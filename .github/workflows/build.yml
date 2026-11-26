@@ -15,26 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download source zip from release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract source zip
         run: |
-          if ! gh release view source --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "::error::'source' নামের release পাওয়া যায়নি। Releases পেজে tag 'source' দিয়ে release তৈরি করো এবং Draft না রেখে Publish করো।"
+          if [ ! -f v_player.zip ]; then
+            echo "::error::Repository-র root-এ v_player.zip পাওয়া যায়নি। ফাইল আপলোড করো।"
             exit 1
           fi
-          gh release download source \
-            --repo "$GITHUB_REPOSITORY" \
-            --pattern v_player.zip \
-            --dir "$RUNNER_TEMP" \
-            --clobber || {
-              echo "::error::release-এ 'v_player.zip' নামের asset পাওয়া যায়নি। ফাইলের নাম ঠিক আছে কিনা দেখো।"
-              exit 1
-            }
-
-      - name: Extract source into workspace
-        run: |
-          unzip -q "$RUNNER_TEMP/v_player.zip" -d "$RUNNER_TEMP/src"
+          unzip -q v_player.zip -d "$RUNNER_TEMP/src"
           cp -r "$RUNNER_TEMP/src/v_player/." "$GITHUB_WORKSPACE/"
 
       - uses: actions/setup-java@v4
